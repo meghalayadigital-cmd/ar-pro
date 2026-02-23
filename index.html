@@ -1,83 +1,85 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Universal AR Album</title>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Universal AR Album</title>
 
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-    <script>
-      AFRAME.registerComponent("mytargets", {
-        init: function () {
+  <script>
+    AFRAME.registerComponent("mytargets", {
+      init: function () {
 
-          const array = [
-            "A","B","C","D","E","F","G","H","I","J",
-            "K","L","M","N","O","P","Q","R","S","T",
-            "U","V","W","X","Y","Z"
-          ];
+        const array = [
+          "A","B","C","D","E","F","G","H","I","J",
+          "K","L","M","N","O","P","Q","R","S","T",
+          "U","V","W","X","Y","Z"
+        ];
 
-          const maxTargets = array.length; // 🔥 Important
+        const maxTargets = array.length;
 
-          const scene = document.querySelector("a-scene");
-          const assets = document.querySelector("a-assets");
+        const scene = document.querySelector("a-scene");
+        const assets = document.querySelector("a-assets");
 
-          for (let i = 0; i < maxTargets; i++) {
+        for (let i = 0; i < maxTargets; i++) {
 
-            // 🔥 Create video element
-            let video = document.createElement("video");
-            video.setAttribute("id", "vid" + i);
-            video.setAttribute("src", "./videos/" + array[i] + ".mp4");
-            video.setAttribute("loop", "true");
-            video.setAttribute("muted", "true"); // 🔥 MUST for mobile
-            video.setAttribute("autoplay", "true");
-            video.setAttribute("playsinline", "");
-            video.setAttribute("webkit-playsinline", "");
-            video.setAttribute("crossorigin", "anonymous");
+          // 🔥 Create video
+          let video = document.createElement("video");
+          video.setAttribute("id", "vid" + i);
+          video.setAttribute("src", "./videos/" + array[i] + ".mp4");
+          video.setAttribute("loop", "true");
+          video.setAttribute("muted", "true"); // mobile requirement
+          video.setAttribute("playsinline", "");
+          video.setAttribute("webkit-playsinline", "");
+          video.setAttribute("crossorigin", "anonymous");
 
-            assets.appendChild(video);
+          video.pause(); // 🔥 start lo play kakudadhu
 
-            // 🔥 Create target entity
-            let entity = document.createElement("a-entity");
-            entity.setAttribute("mindar-image-target", "targetIndex: " + i);
+          assets.appendChild(video);
 
-            // 🔥 Create video plane
-            let plane = document.createElement("a-plane");
-            plane.setAttribute("src", "#vid" + i);
-            plane.setAttribute("position", "0 0 0");
-            plane.setAttribute("height", "0.674");
-            plane.setAttribute("width", "1");
-            plane.setAttribute("rotation", "0 0 0");
+          // 🔥 Target entity
+          let entity = document.createElement("a-entity");
+          entity.setAttribute("mindar-image-target", "targetIndex: " + i);
 
-            entity.appendChild(plane);
-            scene.appendChild(entity);
+          // 🔥 Video plane
+          let plane = document.createElement("a-plane");
+          plane.setAttribute("src", "#vid" + i);
+          plane.setAttribute("position", "0 0 0");
+          plane.setAttribute("height", "0.674");
+          plane.setAttribute("width", "1");
+          plane.setAttribute("rotation", "0 0 0");
 
-            // 🔥 Play when marker found
-            entity.addEventListener("targetFound", () => {
-              video.play();
-            });
+          entity.appendChild(plane);
+          scene.appendChild(entity);
 
-            // 🔥 Pause when marker lost
-            entity.addEventListener("targetLost", () => {
-              video.pause();
-            });
-          }
-        },
-      });
-    </script>
-  </head>
+          // 🔥 Play only when marker found
+          entity.addEventListener("targetFound", () => {
+            video.play();
+          });
 
-  <body>
-    <a-scene
-      mytargets
-      mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 26;"
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
-    >
-      <a-assets></a-assets>
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    </a-scene>
-  </body>
+          // 🔥 Pause when marker lost
+          entity.addEventListener("targetLost", () => {
+            video.pause();
+            video.currentTime = 0;
+          });
+        }
+      },
+    });
+  </script>
+</head>
+
+<body>
+  <a-scene
+    mytargets
+    mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 26;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+    <a-assets></a-assets>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  </a-scene>
+</body>
 </html>
