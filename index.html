@@ -11,54 +11,61 @@
     AFRAME.registerComponent("mytargets", {
       init: function () {
 
-        const array = [
+        const letters = [
           "A","B","C","D","E","F","G","H","I","J",
           "K","L","M","N","O","P","Q","R","S","T",
           "U","V","W","X","Y","Z"
         ];
 
-        const maxTargets = array.length;
-
         const scene = document.querySelector("a-scene");
         const assets = document.querySelector("a-assets");
 
-        for (let i = 0; i < maxTargets; i++) {
+        let allVideos = [];
 
-          // 🔥 Create video
+        for (let i = 0; i < letters.length; i++) {
+
+          // 🔥 Create Video
           let video = document.createElement("video");
           video.setAttribute("id", "vid" + i);
-          video.setAttribute("src", "./videos/" + array[i] + ".mp4");
+          video.setAttribute("src", "./videos/" + letters[i] + ".mp4");
           video.setAttribute("loop", "true");
-          video.setAttribute("muted", "true"); // mobile requirement
+          video.setAttribute("muted", "true");
           video.setAttribute("playsinline", "");
           video.setAttribute("webkit-playsinline", "");
           video.setAttribute("crossorigin", "anonymous");
 
-          video.pause(); // 🔥 start lo play kakudadhu
-
+          video.pause();
           assets.appendChild(video);
+          allVideos.push(video);
 
-          // 🔥 Target entity
+          // 🔥 Create Target Entity
           let entity = document.createElement("a-entity");
           entity.setAttribute("mindar-image-target", "targetIndex: " + i);
 
-          // 🔥 Video plane
+          // 🔥 Create Plane
           let plane = document.createElement("a-plane");
           plane.setAttribute("src", "#vid" + i);
           plane.setAttribute("position", "0 0 0");
           plane.setAttribute("height", "0.674");
           plane.setAttribute("width", "1");
-          plane.setAttribute("rotation", "0 0 0");
 
           entity.appendChild(plane);
           scene.appendChild(entity);
 
-          // 🔥 Play only when marker found
+          // 🔥 When marker found
           entity.addEventListener("targetFound", () => {
+
+            // Stop all videos
+            allVideos.forEach(v => {
+              v.pause();
+              v.currentTime = 0;
+            });
+
+            // Play only current
             video.play();
           });
 
-          // 🔥 Pause when marker lost
+          // 🔥 When marker lost
           entity.addEventListener("targetLost", () => {
             video.pause();
             video.currentTime = 0;
@@ -72,7 +79,7 @@
 <body>
   <a-scene
     mytargets
-    mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 26;"
+    mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;"
     color-space="sRGB"
     renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
