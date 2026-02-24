@@ -1,105 +1,99 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AR Album - Dynamic Fullscreen</title>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Universal AR Album</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script>
+      AFRAME.registerComponent("mytargets", {
+        init: function () {
+          // సీక్రెట్ ఇక్కడే ఉంది: దీన్ని 50 లేదా 100 పెట్టుకోండి.
+          // మీ దగ్గర తక్కువ ఫోటోలు ఉన్నా పర్లేదు, ఇది పనిచేస్తుంది.
+          const maxTargets = 50;
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
-    }
+          const scene = document.querySelector("a-scene");
+          const assets = document.querySelector("a-assets");
+          const array = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+          ];
+          for (let i = 0; i < maxTargets; i++) {
+            // వీడియో ఎలిమెంట్ క్రియేషన్
+            let video = document.createElement("video");
+            video.setAttribute("id", "vid" + i);
+            video.setAttribute("src", "./videos/" + array[i] + ".mp4");
+            video.setAttribute("loop", "true");
+            video.setAttribute("crossorigin", "anonymous");
+            video.setAttribute("playsinline", "");
+            video.setAttribute("webkit-playsinline", "");
 
-    /* 🔥 Fullscreen Video */
-    #fullscreenVideo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: contain; /* Automatic ratio maintain */
-      background: black;
-      display: none;
-      z-index: 9999;
-    }
-  </style>
-</head>
+            video.addEventListener("error", function () {});
 
-<body>
+            assets.appendChild(video);
 
-  <!-- Fullscreen Video Element -->
-  <video
-    id="fullscreenVideo"
-    playsinline
-    webkit-playsinline
-  ></video>
+            let entity = document.createElement("a-entity");
+            entity.setAttribute("mindar-image-target", "targetIndex: " + i);
 
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;"
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-  >
+            let plane = document.createElement("a-plane");
+            plane.setAttribute("src", "#vid" + i);
+            plane.setAttribute("position", "0 0 0");
+            plane.setAttribute("height", "0.674");
+            plane.setAttribute("width", "1");
+            plane.setAttribute("rotation", "0 0 0");
 
-    <a-assets></a-assets>
+            entity.appendChild(plane);
+            scene.appendChild(entity);
 
-    <!-- 🔴 TARGET 0 – Apple -->
-    <a-entity
-      id="targetApple"
-      mindar-image-target="targetIndex: 0">
-    </a-entity>
-
-    <!-- 🟢 TARGET 1 – Girl -->
-    <a-entity
-      id="targetGirl"
-      mindar-image-target="targetIndex: 1">
-    </a-entity>
-
-    <a-camera
-      position="0 0 0"
-      look-controls="enabled: false">
-    </a-camera>
-
-  </a-scene>
-
-  <script>
-    const fullscreenVideo = document.getElementById("fullscreenVideo");
-
-    const targetApple = document.querySelector("#targetApple");
-    const targetGirl = document.querySelector("#targetGirl");
-
-    function playVideo(src) {
-      fullscreenVideo.src = src;
-      fullscreenVideo.style.display = "block";
-      fullscreenVideo.play().catch(() => {});
-    }
-
-    function stopVideo() {
-      fullscreenVideo.pause();
-      fullscreenVideo.currentTime = 0;
-      fullscreenVideo.style.display = "none";
-    }
-
-    // Apple
-    targetApple.addEventListener("targetFound", () => {
-      playVideo("./videos/Apple.mp4");
-    });
-
-    targetApple.addEventListener("targetLost", stopVideo);
-
-    // Girl
-    targetGirl.addEventListener("targetFound", () => {
-      playVideo("./videos/Girl.mp4");
-    });
-
-    targetGirl.addEventListener("targetLost", stopVideo);
-
-  </script>
-
-</body>
+            entity.addEventListener("targetFound", () => {
+              if (video.readyState >= 1) {
+                video.play();
+              }
+            });
+            entity.addEventListener("targetLost", () => {
+              video.pause();
+            });
+          }
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene
+      mytargets
+      mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets></a-assets>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    </a-scene>
+  </body>
 </html>
