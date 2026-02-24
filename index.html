@@ -2,91 +2,97 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Universal AR Album</title>
+  <title>AR Album Fullscreen</title>
 
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-  <script>
-    AFRAME.registerComponent("mytargets", {
-      init: function () {
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
 
-        const letters = [
-          "A","B","C","D","E","F","G","H","I","J",
-          "K","L","M","N","O","P","Q","R","S","T",
-          "U","V","W","X","Y","Z"
-        ];
-
-        const scene = document.querySelector("a-scene");
-        const assets = document.querySelector("a-assets");
-
-        let allVideos = [];
-
-        for (let i = 0; i < letters.length; i++) {
-
-          // 🔥 Create Video
-          let video = document.createElement("video");
-          video.setAttribute("id", "vid" + i);
-          video.setAttribute("src", "./videos/" + letters[i] + ".mp4");
-          video.setAttribute("loop", "true");
-          video.setAttribute("muted", "true");
-          video.setAttribute("playsinline", "");
-          video.setAttribute("webkit-playsinline", "");
-          video.setAttribute("crossorigin", "anonymous");
-
-          video.pause();
-          assets.appendChild(video);
-          allVideos.push(video);
-
-          // 🔥 Create Target Entity
-          let entity = document.createElement("a-entity");
-          entity.setAttribute("mindar-image-target", "targetIndex: " + i);
-
-          // 🔥 Create Plane
-          let plane = document.createElement("a-plane");
-          plane.setAttribute("src", "#vid" + i);
-          plane.setAttribute("position", "0 0 0");
-          plane.setAttribute("height", "0.674");
-          plane.setAttribute("width", "1");
-
-          entity.appendChild(plane);
-          scene.appendChild(entity);
-
-          // 🔥 When marker found
-          entity.addEventListener("targetFound", () => {
-
-            // Stop all videos
-            allVideos.forEach(v => {
-              v.pause();
-              v.currentTime = 0;
-            });
-
-            // Play only current
-            video.play();
-          });
-
-          // 🔥 When marker lost
-          entity.addEventListener("targetLost", () => {
-            video.pause();
-            video.currentTime = 0;
-          });
-        }
-      },
-    });
-  </script>
+    /* Fullscreen Video Style */
+    #fullscreenVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: black;
+      display: none;
+      z-index: 9999;
+    }
+  </style>
 </head>
 
 <body>
+
+  <!-- FULLSCREEN VIDEO -->
+  <video
+    id="fullscreenVideo"
+    playsinline
+    webkit-playsinline
+  ></video>
+
   <a-scene
-    mytargets
     mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;"
     color-space="sRGB"
     renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
   >
+
+    <!-- Assets -->
     <a-assets></a-assets>
+
+    <!-- TARGET 0 – Apple -->
+    <a-entity mindar-image-target="targetIndex: 0" id="targetApple">
+    </a-entity>
+
+    <!-- TARGET 1 – Girl -->
+    <a-entity mindar-image-target="targetIndex: 1" id="targetGirl">
+    </a-entity>
+
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
   </a-scene>
+
+  <script>
+    const fullscreenVideo = document.getElementById("fullscreenVideo");
+
+    const targetApple = document.querySelector("#targetApple");
+    const targetGirl = document.querySelector("#targetGirl");
+
+    function playFullVideo(src) {
+      fullscreenVideo.src = src;
+      fullscreenVideo.style.display = "block";
+      fullscreenVideo.play();
+    }
+
+    function stopFullVideo() {
+      fullscreenVideo.pause();
+      fullscreenVideo.currentTime = 0;
+      fullscreenVideo.style.display = "none";
+    }
+
+    // Apple Target
+    targetApple.addEventListener("targetFound", () => {
+      playFullVideo("./videos/Apple.mp4");
+    });
+
+    targetApple.addEventListener("targetLost", stopFullVideo);
+
+    // Girl Target
+    targetGirl.addEventListener("targetFound", () => {
+      playFullVideo("./videos/Girl.mp4");
+    });
+
+    targetGirl.addEventListener("targetLost", stopFullVideo);
+
+  </script>
+
 </body>
 </html>
